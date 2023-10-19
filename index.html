@@ -69,6 +69,7 @@
         const titleScreen = document.getElementById('title-screen');
         const gameContainer = document.getElementById('game-container');
         const startButton = document.getElementById('start-button');
+        let gameStarted = false; // A flag to track whether the game has started
 
         const player = document.getElementById('player');
         let playerX = 0;
@@ -84,56 +85,58 @@
         }
 
         function update() {
-            requestAnimationFrame(update);
+            if (gameStarted) {
+                requestAnimationFrame(update);
 
-            if (keys.ArrowUp || keys.W) playerY -= playerSpeed;
-            if (keys.ArrowDown || keys.S) playerY += playerSpeed;
-            if (keys.ArrowLeft || keys.A) playerX -= playerSpeed;
-            if (keys.ArrowRight || keys.D) playerX += playerSpeed;
+                if (keys.ArrowUp || keys.W) playerY -= playerSpeed;
+                if (keys.ArrowDown || keys.S) playerY += playerSpeed;
+                if (keys.ArrowLeft || keys.A) playerX -= playerSpeed;
+                if (keys.ArrowRight || keys.D) playerX += playerSpeed;
 
-            player.style.left = playerX + 'px';
-            player.style.top = playerY + 'px';
+                player.style.left = playerX + 'px';
+                player.style.top = playerY + 'px';
 
-            const playerRotation = updatePlayerRotation(mouseX, mouseY);
+                const playerRotation = updatePlayerRotation(mouseX, mouseY);
 
-            // Update bullets
-            bullets = bullets.filter((bullet) => {
-                const bulletY = parseFloat(bullet.style.top);
-                if (bulletY > -10) {
-                    const bulletRotation = parseFloat(bullet.style.transform.replace('rotate(', '').replace('rad)', ''));
-                    const bulletSpeed = 5;
-                    const bulletX = parseFloat(bullet.style.left);
+                // Update bullets
+                bullets = bullets.filter((bullet) => {
                     const bulletY = parseFloat(bullet.style.top);
-                    bullet.style.left = bulletX + bulletSpeed * Math.sin(bulletRotation) + 'px';
-                    bullet.style.top = bulletY - bulletSpeed * Math.cos(bulletRotation) + 'px';
-                    return true;
-                }
-                document.body.removeChild(bullet);
-                return false;
-            });
+                    if (bulletY > -10) {
+                        const bulletRotation = parseFloat(bullet.style.transform.replace('rotate(', '').replace('rad)', ''));
+                        const bulletSpeed = 5;
+                        const bulletX = parseFloat(bullet.style.left);
+                        const bulletY = parseFloat(bullet.style.top);
+                        bullet.style.left = bulletX + bulletSpeed * Math.sin(bulletRotation) + 'px';
+                        bullet.style.top = bulletY - bulletSpeed * Math.cos(bulletRotation) + 'px';
+                        return true;
+                    }
+                    document.body.removeChild(bullet);
+                    return false;
+                });
 
-            // Update enemies
-            enemies.forEach((enemy) => {
-                const enemyX = parseFloat(enemy.style.left);
-                const enemyY = parseFloat(enemy.style.top);
-                const enemyRotation = Math.atan2(playerY - enemyY, playerX - enemyX);
-                const enemySpeed = 2;
-                enemy.style.left = enemyX + enemySpeed * Math.cos(enemyRotation) + 'px';
-                enemy.style.top = enemyY + enemySpeed * Math.sin(enemyRotation) + 'px';
+                // Update enemies
+                enemies.forEach((enemy) => {
+                    const enemyX = parseFloat(enemy.style.left);
+                    const enemyY = parseFloat(enemy.style.top);
+                    const enemyRotation = Math.atan2(playerY - enemyY, playerX - enemyX);
+                    const enemySpeed = 2;
+                    enemy.style.left = enemyX + enemySpeed * Math.cos(enemyRotation) + 'px';
+                    enemy.style.top = enemyY + enemySpeed * Math.sin(enemyRotation) + 'px';
 
-                // Check for collision with player
-                const playerRect = player.getBoundingClientRect();
-                const enemyRect = enemy.getBoundingClientRect();
-                if (
-                    playerRect.left < enemyRect.right &&
-                    playerRect.right > enemyRect.left &&
-                    playerRect.top < enemyRect.bottom &&
-                    playerRect.bottom > enemyRect.top
-                ) {
-                    // Game over logic can be added here.
-                    alert('Game Over');
-                }
-            });
+                    // Check for collision with player
+                    const playerRect = player.getBoundingClientRect();
+                    const enemyRect = enemy.getBoundingClientRect();
+                    if (
+                        playerRect.left < enemyRect.right &&
+                        playerRect.right > enemyRect.left &&
+                        playerRect.top < enemyRect.bottom &&
+                        playerRect.bottom > enemyRect.top
+                    ) {
+                        // Game over logic can be added here.
+                        alert('Game Over');
+                    }
+                });
+            }
         }
 
         const keys = {};
@@ -142,7 +145,7 @@
 
         document.addEventListener('keydown', (event) => {
             keys[event.key] = true;
-            if (event.key === ' ' || event.key === 'Spacebar') {
+            if (gameStarted && (event.key === ' ' || event.key === 'Spacebar')) {
                 createBullet(playerX + player.offsetWidth / 2 - 5, playerY, playerRotation);
             }
         });
@@ -170,16 +173,15 @@
             enemies.push(enemy);
         }
 
-        // Create initial enemy
-        createEnemy(200, 200);
-
-        let lastTime = Date.now();
-        update();
-
         // Function to start the game and hide the title screen
         function startGame() {
+            gameStarted = true; // Set the game as started
             titleScreen.style.display = 'none';
             gameContainer.style.display = 'block';
+
+            // Create initial enemy after the game has started
+            createEnemy(200, 200);
+            update(); // Start the game loop
         }
 
         // Attach an event listener to the start button
