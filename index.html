@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CUBESHOOTER</title>
+    <!-- Change the favicon to your PNG image file -->
+    <link rel="icon" type="image/png" href="https://cdn.discordapp.com/attachments/1122836273464352860/1164478790991355944/t7.png?ex=65435c62&is=6530e762&hm=c51a1c163092022dc3505c34cdbae0c38499b0eed6eb5154a924bb60dba739f8&">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #player {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: red;
+            transform-origin: center;
+        }
+
+        .bullet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: blue;
+        }
+
+        .enemy {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: purple;
+        }
+    </style>
+</head>
+<body>
+    <div id="player"></div>
+    <script>
+        const player = document.getElementById('player');
+        let playerX = 0;
+        let playerY = 0;
+        const playerSpeed = 5;
+        let bullets = [];
+        let enemies = [];
+
+        function updatePlayerRotation(x, y) {
+            const angle = Math.atan2(y - playerY, x - playerX);
+            player.style.transform = `rotate(${angle}rad)`;
+            return angle;
+        }
+
+        function update() {
+            requestAnimationFrame(update);
+
+            if (keys.ArrowUp || keys.W) playerY -= playerSpeed;
+            if (keys.ArrowDown || keys.S) playerY += playerSpeed;
+            if (keys.ArrowLeft || keys.A) playerX -= playerSpeed;
+            if (keys.ArrowRight || keys.D) playerX += playerSpeed;
+
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+
+            const playerRotation = updatePlayerRotation(mouseX, mouseY);
+
+            // Update bullets
+            bullets = bullets.filter((bullet) => {
+                const bulletY = parseFloat(bullet.style.top);
+                if (bulletY > -10) {
+                    const bulletRotation = parseFloat(bullet.style.transform.replace('rotate(', '').replace('rad)', ''));
+                    const bulletSpeed = 5;
+                    const bulletX = parseFloat(bullet.style.left);
+                    const bulletY = parseFloat(bullet.style.top);
+                    bullet.style.left = bulletX + bulletSpeed * Math.sin(bulletRotation) + 'px';
+                    bullet.style.top = bulletY - bulletSpeed * Math.cos(bulletRotation) + 'px';
+                    return true;
+                }
+                document.body.removeChild(bullet);
+                return false;
+            });
+
+            // Update enemies
+            enemies.forEach((enemy) => {
+                const enemyX = parseFloat(enemy.style.left);
+                const enemyY = parseFloat(enemy.style.top);
+                const enemyRotation = Math.atan2(playerY - enemyY, playerX - enemyX);
+                const enemySpeed = 2;
+                enemy.style.left = enemyX + enemySpeed * Math.cos(enemyRotation) + 'px';
+                enemy.style.top = enemyY + enemySpeed * Math.sin(enemyRotation) + 'px';
+
+                // Check for collision with player
+                const playerRect = player.getBoundingClientRect();
+                const enemyRect = enemy.getBoundingClientRect();
+                if (
+                    playerRect.left < enemyRect.right &&
+                    playerRect.right > enemyRect.left &&
+                    playerRect.top < enemyRect.bottom &&
+                    playerRect.bottom > enemyRect.top
+                ) {
+                    // Game over logic can be added here.
+                    alert('Game Over');
+                }
+            });
+        }
+
+        const keys = {};
+        const mouseX = window.innerWidth / 2;
+        const mouseY = window.innerHeight / 2;
+
+        document.addEventListener('keydown', (event) => {
+            keys[event.key] = true;
+            if (event.key === ' ' || event.key === 'Spacebar') {
+                createBullet(playerX + player.offsetWidth / 2 - 5, playerY, playerRotation);
+            }
+        });
+        document.addEventListener('keyup', (event) => {
+            keys[event.key] = false;
+        });
+
+        function createBullet(x, y, rotation) {
+            const bullet = document.createElement('div');
+            bullet.className = 'bullet';
+            bullet.style.left = x + 'px';
+            bullet.style.top = y + 'px';
+            bullet.style.transform = `rotate(${rotation}rad)`;
+            document.body.appendChild(bullet);
+            bullets.push(bullet);
+        }
+
+        function createEnemy(x, y) {
+            const enemy = document.createElement('div');
+            enemy.className = 'enemy';
+            enemy.style.left = x + 'px';
+            enemy.style.top = y + 'px';
+            document.body.appendChild(enemy);
+            enemies.push(enemy);
+        }
+
+        // Create initial enemy
+        createEnemy(200, 200);
+
+        let lastTime = Date.now();
+        update();
+    </script>
+</body>
+</html>
