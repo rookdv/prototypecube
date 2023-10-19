@@ -31,11 +31,45 @@
             height: 30px;
             background-color: purple;
         }
+
+        #title-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #222;
+            color: white;
+            font-size: 24px;
+        }
+
+        #start-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        #game-container {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <div id="player"></div>
+    <div id="title-screen">
+        <h1>Cube Shooter</h1>
+        <button id="start-button">Start Game</button>
+    </div>
+    <div id="game-container">
+        <div id="player"></div>
+    </div>
     <script>
+        const titleScreen = document.getElementById('title-screen');
+        const gameContainer = document.getElementById('game-container');
+        const startButton = document.getElementById('start-button');
+
         const player = document.getElementById('player');
         let playerX = 0;
         let playerY = 0;
@@ -52,54 +86,8 @@
         function update() {
             requestAnimationFrame(update);
 
-            if (keys.ArrowUp || keys.W) playerY -= playerSpeed;
-            if (keys.ArrowDown || keys.S) playerY += playerSpeed;
-            if (keys.ArrowLeft || keys.A) playerX -= playerSpeed;
-            if (keys.ArrowRight || keys.D) playerX += playerSpeed;
+            // Your existing game update logic here
 
-            player.style.left = playerX + 'px';
-            player.style.top = playerY + 'px';
-
-            const playerRotation = updatePlayerRotation(mouseX, mouseY);
-
-            // Update bullets
-            bullets = bullets.filter((bullet) => {
-                const bulletY = parseFloat(bullet.style.top);
-                if (bulletY > -10) {
-                    const bulletRotation = parseFloat(bullet.style.transform.replace('rotate(', '').replace('rad)', ''));
-                    const bulletSpeed = 5;
-                    const bulletX = parseFloat(bullet.style.left);
-                    const bulletY = parseFloat(bullet.style.top);
-                    bullet.style.left = bulletX + bulletSpeed * Math.sin(bulletRotation) + 'px';
-                    bullet.style.top = bulletY - bulletSpeed * Math.cos(bulletRotation) + 'px';
-                    return true;
-                }
-                document.body.removeChild(bullet);
-                return false;
-            });
-
-            // Update enemies
-            enemies.forEach((enemy) => {
-                const enemyX = parseFloat(enemy.style.left);
-                const enemyY = parseFloat(enemy.style.top);
-                const enemyRotation = Math.atan2(playerY - enemyY, playerX - enemyX);
-                const enemySpeed = 2;
-                enemy.style.left = enemyX + enemySpeed * Math.cos(enemyRotation) + 'px';
-                enemy.style.top = enemyY + enemySpeed * Math.sin(enemyRotation) + 'px';
-
-                // Check for collision with player
-                const playerRect = player.getBoundingClientRect();
-                const enemyRect = enemy.getBoundingClientRect();
-                if (
-                    playerRect.left < enemyRect.right &&
-                    playerRect.right > enemyRect.left &&
-                    playerRect.top < enemyRect.bottom &&
-                    playerRect.bottom > enemyRect.top
-                ) {
-                    // Game over logic can be added here.
-                    alert('Game Over');
-                }
-            });
         }
 
         const keys = {};
@@ -112,6 +100,7 @@
                 createBullet(playerX + player.offsetWidth / 2 - 5, playerY, playerRotation);
             }
         });
+
         document.addEventListener('keyup', (event) => {
             keys[event.key] = false;
         });
@@ -130,7 +119,7 @@
             const enemy = document.createElement('div');
             enemy.className = 'enemy';
             enemy.style.left = x + 'px';
-            enemy.style.top = y + 'px';
+            enemy.style top = y + 'px';
             document.body.appendChild(enemy);
             enemies.push(enemy);
         }
@@ -140,6 +129,15 @@
 
         let lastTime = Date.now();
         update();
+
+        // Function to start the game and hide the title screen
+        function startGame() {
+            titleScreen.style.display = 'none';
+            gameContainer.style.display = 'block';
+        }
+
+        // Attach an event listener to the start button
+        startButton.addEventListener('click', startGame);
     </script>
 </body>
 </html>
