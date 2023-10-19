@@ -10,12 +10,25 @@
             overflow: hidden;
         }
 
+        #player-container {
+            position: absolute;
+        }
+
         #player {
             position: absolute;
             width: 40px;
             height: 40px;
             background-color: red;
             transform-origin: center;
+        }
+
+        #gun {
+            position: absolute;
+            width: 10px;
+            height: 20px;
+            background-color: gray;
+            top: 10px;
+            left: 15px;
         }
 
         .bullet {
@@ -55,6 +68,19 @@
         #game-container {
             display: none;
         }
+
+        #fire-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 10px 20px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -63,15 +89,22 @@
         <button id="start-button">Start Game</button>
     </div>
     <div id="game-container">
-        <div id="player"></div>
+        <div id="player-container">
+            <div id="player">
+                <div id="gun"></div>
+            </div>
+        </div>
+        <button id="fire-button">Fire</button>
     </div>
     <script>
         const titleScreen = document.getElementById('title-screen');
         const gameContainer = document.getElementById('game-container');
         const startButton = document.getElementById('start-button');
+        const fireButton = document.getElementById('fire-button');
         let gameStarted = false; // A flag to track whether the game has started
 
         const player = document.getElementById('player');
+        const gun = document.getElementById('gun');
         let playerX = 0;
         let playerY = 0;
         const playerSpeed = 5;
@@ -168,26 +201,4 @@
 
         function createEnemy(x, y) {
             const enemy = document.createElement('div');
-            enemy.className = 'enemy';
-            enemy.style.left = x + 'px';
-            enemy.style.top = y + 'px';
-            document.body.appendChild(enemy);
-            enemies.push(enemy);
-        }
-
-        // Function to start the game and hide the title screen
-        function startGame() {
-            gameStarted = true; // Set the game as started
-            titleScreen.style.display = 'none';
-            gameContainer.style.display = 'block';
-
-            // Create initial enemy after the game has started
-            createEnemy(200, 200);
-            update(); // Start the game loop
-        }
-
-        // Attach an event listener to the start button
-        startButton.addEventListener('click', startGame);
-    </script>
-</body>
-</html>
+           
