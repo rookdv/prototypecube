@@ -132,8 +132,10 @@
                         playerRect.top < enemyRect.bottom &&
                         playerRect.bottom > enemyRect.top
                     ) {
-                        // Game over logic can be added here.
-                        alert('Game Over');
+                        // Game over logic can be added here (e.g., reset the game).
+                        // For now, let's just remove the player.
+                        gameStarted = false; // Pause the game
+                        player.style.display = 'none';
                     }
                 });
             }
